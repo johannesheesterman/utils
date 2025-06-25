@@ -6,12 +6,58 @@ JIRA_DIR="$HOME/jira"
 # Create the directory if it doesn't exist
 mkdir -p "$JIRA_DIR"
 
-# Query for active Jira issues assigned to you and get their keys
-jira issue list --assignee=$(jira me) --status="To Do" --plain --no-headers --columns=KEY | while read -r issue_key; do
+# Get all active issue keys from Jira
+active_issues=()
+while IFS= read -r issue_key;
+do
+    # Skip empty lines
+    if [ -n "$issue_key" ]; then
+        active_issues+=("$issue_key")
+    fi
+done < <(jira issue list --assignee=$(jira me) --status="To Do" --plain --no-headers --columns=KEY)
+
+# Prune old files
+for file in "$JIRA_DIR"/*.md;
+do
+    # Skip if it's not a file
+    [ -f "$file" ] || continue
+
+    # Get the issue key from the filename
+    issue_key=$(basename "$file" .md)
+
+    # Check if the issue key is in the list of active issues
+    found=false
+    for active_issue in "${active_issues[@]}";
+do
+        if [[ "$active_issue" == "$issue_key" ]]; then
+            found=true
+            break
+        fi
+    done
+
+    # If the issue is not found, delete the file
+    if [ "$found" = false ]; then
+        echo "Removing stale file: $file"
+        rm "$file"
+    fi
+done
+
+# Create markdown files for new issues
+for issue_key in "${active_issues[@]}";
+do
     # Skip empty lines that might result from the command
     if [ -z "$issue_key" ]; then
         continue
     fi
+
+    final_file="$JIRA_DIR/$issue_key.md"
+
+    # If the markdown file already exists, skip to the next issue
+    if [ -f "$final_file" ]; then
+        continue
+    fi
+
+    echo "Creating file for new issue: $issue_key"
 
     # Get the raw JSON for the specific issue
     issue_json=$(jira issue view "$issue_key" --raw)
@@ -21,7 +67,6 @@ jira issue list --assignee=$(jira me) --status="To Do" --plain --no-headers --co
 
     # Create a temporary markdown file for each issue, named with the issue key.
     temp_file="$JIRA_DIR/$issue_key.md.tmp"
-    final_file="$JIRA_DIR/$issue_key.md"
 
     echo -e "# $issue_key\n\n$issue_description" > "$temp_file"
 
