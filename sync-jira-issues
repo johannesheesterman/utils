@@ -76,4 +76,32 @@ do
 
     # Remove the temporary file
     rm "$temp_file"
+
+    # Create a directory for attachments
+    ATTACHMENT_DIR="$JIRA_DIR/$issue_key"
+    mkdir -p "$ATTACHMENT_DIR"
+
+    # Get Jira server and login from config
+    JIRA_SERVER=$(awk '/^server:/ {print $2}' "$HOME/.config/.jira/.config.yml")
+    JIRA_LOGIN=$(awk '/^login:/ {print $2}' "$HOME/.config/.jira/.config.yml")
+
+    # Extract attachment details and download them
+    echo "$issue_json" | jq -r '.fields.attachment[] | "\(.id) \(.filename) \(.content)"' | while read -r id filename url; do
+        ATTACHMENT_PATH="$ATTACHMENT_DIR/$filename"
+        if [ ! -f "$ATTACHMENT_PATH" ]; then
+            echo "Downloading attachment '$filename' for issue $issue_key..."
+            # Use curl with Basic Authentication (user:api_token)
+            # Flags: -L (follow redirects), -S (show errors), -f (fail on server errors)
+            CURL_EXIT_CODE=0
+            curl -L -S -f -u "$JIRA_LOGIN:$JIRA_API_TOKEN" -H "X-Atlassian-Token: no-check" -o "$ATTACHMENT_PATH" "$url" || CURL_EXIT_CODE=$?
+
+            if [ $CURL_EXIT_CODE -ne 0 ]; then
+                echo "  ERROR: Failed to download attachment '$filename' for issue $issue_key. Curl exit code: $CURL_EXIT_CODE"
+                # Clean up the potentially empty file created by curl on failure
+                rm -f "$ATTACHMENT_PATH"
+            else
+                echo "  Successfully downloaded '$filename'."
+            fi
+        fi
+    done
 done
