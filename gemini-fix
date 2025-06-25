@@ -38,6 +38,4 @@ $ATTACHMENTS
 Begin the task now.
 """
 
-echo "Prompt for Gemini AI:"
-echo -e "$PROMPT"
-#gemini -y -p "$PROMPT"
+gemini -y -p "$PROMPT"
