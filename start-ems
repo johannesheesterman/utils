@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Set the project directory
+PROJECT_DIR="$HOME/github/elfsquad/cpq/projects/ems"
+
+# Name of the tmux window
+WINDOW_NAME="ems-app"
+
+# Create a new window and run the start command
+tmux new-window -n "$WINDOW_NAME" "cd $PROJECT_DIR && npm run start; exec bash"

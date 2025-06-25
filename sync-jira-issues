@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# Set the directory where the Jira markdown files will be saved
+JIRA_DIR="$HOME/jira"
+
+# Create the directory if it doesn't exist
+mkdir -p "$JIRA_DIR"
+
+# Query for active Jira issues assigned to you and get their keys
+jira issue list --assignee=$(jira me) --status="To Do" --plain --no-headers --columns=KEY | while read -r issue_key; do
+    # Skip empty lines that might result from the command
+    if [ -z "$issue_key" ]; then
+        continue
+    fi
+
+    # Get the raw JSON for the specific issue
+    issue_json=$(jira issue view "$issue_key" --raw)
+
+    # Extract the description from the JSON.
+    issue_description=$(echo "$issue_json" | jq -r '.fields.description')
+
+    # Create a temporary markdown file for each issue, named with the issue key.
+    temp_file="$JIRA_DIR/$issue_key.md.tmp"
+    final_file="$JIRA_DIR/$issue_key.md"
+
+    echo -e "# $issue_key\n\n$issue_description" > "$temp_file"
+
+    # Convert the Jira JSON to Markdown using the Python script
+    python3 ~/utils/jira-to-markdown.py "$temp_file" > "$final_file"
+
+    # Remove the temporary file
+    rm "$temp_file"
+done

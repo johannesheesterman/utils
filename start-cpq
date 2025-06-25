@@ -1,0 +1,41 @@
+#!/bin/bash
+
+# Set the base directory for the projects
+BASE_DIR="$HOME/github/elfsquad/cpq/projects/cpq/src/Web"
+
+# An array of project paths relative to the base directory
+PROJECTS=(
+    "Elfskot.Api/Elfskot.Api.csproj"
+    "Elfsquad.ConfiguratorApi/Elfsquad.ConfiguratorApi.csproj"
+    # "Elfsquad.GitApi/Elfsquad.GitApi.csproj"
+    # "Elfsquad.DiagnosticsApi/Elfsquad.DiagnosticsApi.csproj"
+    # "Elfsquad.NotificationService/Elfsquad.NotificationService.csproj"
+    # "Elfsquad.Billing/Elfsquad.Billing.csproj"
+    "Elfsquad.Web.QuotationApi/Elfsquad.Web.QuotationApi.csproj"
+    # "Elfsquad.CustomerApi/Elfsquad.CustomerApi.csproj"
+    "Elfsquad.OdataApi/Elfsquad.OdataApi.csproj"
+    # "Elfsquad.Status/Elfsquad.Status.csproj"
+    "Gateways/Elfsquad.Gateways.ApiGateway/Elfsquad.Gateways.ApiGateway.csproj"
+    "Elfsquad.Login/Elfsquad.Login.csproj"
+)
+
+# Name of the tmux window
+WINDOW_NAME="cpq-services"
+
+# Create the first pane in a new window
+FIRST_PROJECT_PATH=${PROJECTS[0]}
+PROJECT_DIR=$(dirname "$FIRST_PROJECT_PATH")
+PANE_TITLE=$(basename "$PROJECT_DIR")
+tmux new-window -n "$WINDOW_NAME" "cd $BASE_DIR/$PROJECT_DIR && dotnet run; exec bash"
+tmux select-pane -T "$PANE_TITLE"
+
+# Create the rest of the panes
+for project_path in "${PROJECTS[@]:1}"; do
+    PROJECT_DIR=$(dirname "$project_path")
+    PANE_TITLE=$(basename "$PROJECT_DIR")
+    tmux split-window -t "$WINDOW_NAME" "cd $BASE_DIR/$PROJECT_DIR && dotnet run; exec bash"
+    tmux select-pane -T "$PANE_TITLE"
+done
+
+# Arrange panes
+tmux select-layout -t "$WINDOW_NAME" tiled
