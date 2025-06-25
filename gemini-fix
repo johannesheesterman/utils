@@ -1,0 +1,26 @@
+#!/bin/bash
+set -e
+
+if [ -z "$1" ]; then
+  echo "Usage: gemini-fix <Jira Issue ID>"
+  exit 1
+fi
+
+JIRA_ISSUE=$1
+JIRA_FILE_PATH="$HOME/jira/$JIRA_ISSUE.md"
+
+if [ ! -f "$JIRA_FILE_PATH" ]; then
+  echo "Jira issue file not found at $JIRA_FILE_PATH"
+  exit 1
+fi
+
+JIRA_DETAILS=$(cat "$JIRA_FILE_PATH")
+
+PROMPT="Given the following Jira issue, please make the necessary code changes to resolve it.
+Only modify files within the ~/github/elfsquad/cpq/projects directory.
+
+Jira Issue: $JIRA_ISSUE
+$JIRA_DETAILS
+"
+
+gemini -y -p "$PROMPT"
