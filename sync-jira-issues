@@ -89,18 +89,15 @@ do
     echo "$issue_json" | jq -r '.fields.attachment[] | "\(.id) \(.filename) \(.content)"' | while read -r id filename url; do
         ATTACHMENT_PATH="$ATTACHMENT_DIR/$filename"
         if [ ! -f "$ATTACHMENT_PATH" ]; then
-            echo "Downloading attachment '$filename' for issue $issue_key..."
             # Use curl with Basic Authentication (user:api_token)
-            # Flags: -L (follow redirects), -S (show errors), -f (fail on server errors)
+            # Flags: -s (silent), -L (follow redirects), -S (show errors), -f (fail on server errors)
             CURL_EXIT_CODE=0
-            curl -L -S -f -u "$JIRA_LOGIN:$JIRA_API_TOKEN" -H "X-Atlassian-Token: no-check" -o "$ATTACHMENT_PATH" "$url" || CURL_EXIT_CODE=$?
+            curl -s -L -S -f -u "$JIRA_LOGIN:$JIRA_API_TOKEN" -H "X-Atlassian-Token: no-check" -o "$ATTACHMENT_PATH" "$url" || CURL_EXIT_CODE=$?
 
             if [ $CURL_EXIT_CODE -ne 0 ]; then
                 echo "  ERROR: Failed to download attachment '$filename' for issue $issue_key. Curl exit code: $CURL_EXIT_CODE"
                 # Clean up the potentially empty file created by curl on failure
                 rm -f "$ATTACHMENT_PATH"
-            else
-                echo "  Successfully downloaded '$filename'."
             fi
         fi
     done
