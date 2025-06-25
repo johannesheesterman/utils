@@ -62,13 +62,14 @@ do
     # Get the raw JSON for the specific issue
     issue_json=$(jira issue view "$issue_key" --raw)
 
-    # Extract the description from the JSON.
+    # Extract the summary and description from the JSON.
+    issue_summary=$(echo "$issue_json" | jq -r '.fields.summary')
     issue_description=$(echo "$issue_json" | jq -r '.fields.description')
 
     # Create a temporary markdown file for each issue, named with the issue key.
     temp_file="$JIRA_DIR/$issue_key.md.tmp"
 
-    echo -e "# $issue_key\n\n$issue_description" > "$temp_file"
+    echo -e "# $issue_key: $issue_summary\n\n$issue_description" > "$temp_file"
 
     # Convert the Jira JSON to Markdown using the Python script
     python3 ~/utils/jira-to-markdown.py "$temp_file" > "$final_file"
