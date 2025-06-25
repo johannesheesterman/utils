@@ -15,22 +15,22 @@ if [ ! -f "$JIRA_FILE_PATH" ]; then
 fi
 
 JIRA_DETAILS=$(cat "$JIRA_FILE_PATH")
+ATTACHMENT_DIR="$HOME/jira/$JIRA_ISSUE"
+ATTACHMENTS=""
 
-PROMPT="""
-You are an expert senior software engineer specializing in the Elfsquad CPQ system.
-Your task is to resolve the following Jira issue by making precise and efficient code changes.
+if [ -d "$ATTACHMENT_DIR" ]; then
+    ATTACHMENTS="\n**Attachments:**\n"
+    for f in "$ATTACHMENT_DIR"/*; do
+        ATTACHMENTS+="* $f\n"
+    done
+fi
 
-**Jira Issue Details:**
-
-* **Issue ID:** $JIRA_ISSUE
-* **Description:**
----
-$JIRA_DETAILS
----
+PROMPT="""You are an expert senior software engineer specializing in the Elfsquad CPQ system.\nYour task is to resolve the following Jira issue by making precise and efficient code changes.\n\n**Jira Issue Details:**\n\n* **Issue ID:** $JIRA_ISSUE\n* **Description:**\n---\n$JIRA_DETAILS\n---
+$ATTACHMENTS
 
 **Instructions:**
 
-1.  **Analyze:** Carefully analyze the issue description and any provided context.
+1.  **Analyze:** Carefully analyze the issue description and any provided context, including the attachments.
 2.  **Locate:** Identify the relevant files within the ~/github/elfsquad/cpq/projects directory that need modification.
 3.  **Modify:** Make the necessary code changes to resolve the issue. Adhere strictly to the existing coding style, conventions, and best practices of the project.
 4.  **Verify:** Ensure your changes are correct and do not introduce any new issues. The changes should be clean, maintainable, and directly address the problem.
@@ -38,4 +38,6 @@ $JIRA_DETAILS
 Begin the task now.
 """
 
-gemini -y -p "$PROMPT"
+echo "Prompt for Gemini AI:"
+echo -e "$PROMPT"
+#gemini -y -p "$PROMPT"
