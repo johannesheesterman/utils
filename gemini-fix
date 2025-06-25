@@ -25,17 +25,6 @@ if [ -d "$ATTACHMENT_DIR" ]; then
     done
 fi
 
-PROMPT="""You are an expert senior software engineer specializing in the Elfsquad CPQ system.\nYour task is to resolve the following Jira issue by making precise and efficient code changes.\n\n**Jira Issue Details:**\n\n* **Issue ID:** $JIRA_ISSUE\n* **Description:**\n---\n$JIRA_DETAILS\n---
-$ATTACHMENTS
-
-**Instructions:**
-
-1.  **Analyze:** Carefully analyze the issue description and any provided context, including the attachments.
-2.  **Locate:** Identify the relevant files within the ~/github/elfsquad/cpq/projects directory that need modification.
-3.  **Modify:** Make the necessary code changes to resolve the issue. Adhere strictly to the existing coding style, conventions, and best practices of the project.
-4.  **Verify:** Ensure your changes are correct and do not introduce any new issues. The changes should be clean, maintainable, and directly address the problem.
-
-Begin the task now.
-"""
+PROMPT="""You are an expert senior software engineer specializing in the Elfsquad CPQ system.\nYour task is to resolve the following Jira issue by making precise and efficient code changes.\n\n**Jira Issue Details:**\n\n* **Issue ID:** $JIRA_ISSUE\n* **Description:**\n---\n$JIRA_DETAILS\n---\n$ATTACHMENTS\n\n**Instructions:**\n\n1.  **Analyze:** Carefully analyze the issue description and any provided context. **It is critical that you analyze all attachments.** These may contain design mockups, screenshots, or other important information.\n2.  **Frontend Changes:** If this is a frontend task, you **must** ensure you fully understand all visual requirements from the attachments before proceeding. This includes colors, layouts, spacing, and any other visual details.\n3.  **Locate:** Identify the relevant files within the ~/github/elfsquad/cpq/projects directory that need modification.\n4.  **Modify:** Make the necessary code changes to resolve the issue. Adhere strictly to the existing coding style, conventions, and best practices of the project.\n5.  **Verify:** Ensure your changes are correct and do not introduce any new issues. The changes should be clean, maintainable, and directly address the problem.\n\nBegin the task now.\n"""
 
 gemini -y -p "$PROMPT"
