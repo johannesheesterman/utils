@@ -16,11 +16,26 @@ fi
 
 JIRA_DETAILS=$(cat "$JIRA_FILE_PATH")
 
-PROMPT="Given the following Jira issue, please make the necessary code changes to resolve it.
-Only modify files within the ~/github/elfsquad/cpq/projects directory.
+PROMPT="""
+You are an expert senior software engineer specializing in the Elfsquad CPQ system.
+Your task is to resolve the following Jira issue by making precise and efficient code changes.
 
-Jira Issue: $JIRA_ISSUE
+**Jira Issue Details:**
+
+* **Issue ID:** $JIRA_ISSUE
+* **Description:**
+---
 $JIRA_DETAILS
-"
+---
+
+**Instructions:**
+
+1.  **Analyze:** Carefully analyze the issue description and any provided context.
+2.  **Locate:** Identify the relevant files within the ~/github/elfsquad/cpq/projects directory that need modification.
+3.  **Modify:** Make the necessary code changes to resolve the issue. Adhere strictly to the existing coding style, conventions, and best practices of the project.
+4.  **Verify:** Ensure your changes are correct and do not introduce any new issues. The changes should be clean, maintainable, and directly address the problem.
+
+Begin the task now.
+"""
 
 gemini -y -p "$PROMPT"
