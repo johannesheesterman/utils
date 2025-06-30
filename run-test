@@ -1,0 +1,3 @@
+#!/bin/bash
+cd /Users/johannes/github/elfsquad/cpq/projects/cpq/src/Tests/Elfsquad.Tests.Unit
+dotnet test --filter "FullyQualifiedName~$1"
