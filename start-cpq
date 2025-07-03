@@ -22,19 +22,20 @@ PROJECTS=(
 # Name of the tmux window
 WINDOW_NAME="cpq-services"
 
-# Create the first pane in a new window
-FIRST_PROJECT_PATH=${PROJECTS[0]}
-PROJECT_DIR=$(dirname "$FIRST_PROJECT_PATH")
-PANE_TITLE=$(basename "$PROJECT_DIR")
-tmux new-window -n "$WINDOW_NAME" "cd $BASE_DIR/$PROJECT_DIR && dotnet run; exec bash"
-tmux select-pane -T "$PANE_TITLE"
+# Flag to check if it's the first pane
+first_pane=true
 
-# Create the rest of the panes
-for project_path in "${PROJECTS[@]:1}"; do
+for project_path in "${PROJECTS[@]}"; do
     PROJECT_DIR=$(dirname "$project_path")
     PANE_TITLE=$(basename "$PROJECT_DIR")
-    tmux split-window -t "$WINDOW_NAME" "cd $BASE_DIR/$PROJECT_DIR && dotnet run; exec bash"
-    tmux select-pane -T "$PANE_TITLE"
+    if [ "$first_pane" = true ]; then
+        tmux new-window -n "$WINDOW_NAME" "cd $BASE_DIR/$PROJECT_DIR && dotnet run; exec bash"
+        tmux select-pane -T "$PANE_TITLE"
+        first_pane=false
+    else
+        tmux split-window -t "$WINDOW_NAME" "cd $BASE_DIR/$PROJECT_DIR && dotnet run; exec bash"
+        tmux select-pane -T "$PANE_TITLE"
+    fi
 done
 
 # Arrange panes
